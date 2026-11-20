@@ -31,9 +31,18 @@ const LAMPORTS = 1e9;
 function bookPath(args) {
   return resolve(String(args.file || process.env.PAPER_FILE || join(homedir(), ".blix-paper", "portfolio.json")));
 }
+function checkBook(book) {
+  const record = book !== null && typeof book === "object" && !Array.isArray(book);
+  const positions = record && book.positions !== null && typeof book.positions === "object" && !Array.isArray(book.positions);
+  if (!record || !Number.isFinite(book.startSol) || book.startSol <= 0
+    || !Number.isFinite(book.cash) || book.cash < 0 || !positions || !Array.isArray(book.trades)) {
+    throw new Error("invalid portfolio structure");
+  }
+  return book;
+}
 function load(path) {
   if (!existsSync(path)) return newBook();
-  try { return JSON.parse(readFileSync(path, "utf8")); }
+  try { return checkBook(JSON.parse(readFileSync(path, "utf8"))); }
   catch { throw new Error(`Cannot read ${path}. Fix or delete it, or run "paper reset".`); }
 }
 function save(path, book) {
@@ -72,7 +81,7 @@ main(async () => {
   // reset never reads the old file, so it can recover from a corrupt one.
   if (cmd === "reset") {
     const start = a1 !== undefined ? Number(a1) : 10;
-    if (!(start > 0)) throw new Error("Starting balance must be a positive number of SOL.");
+    if (!Number.isFinite(start) || !(start > 0)) throw new Error("Starting balance must be a positive finite number of SOL.");
     save(path, newBook(start));
     return out({ reset: true, startSol: start, file: path }, () => console.log(`Fresh paper portfolio with ${sol(start, 2)} at ${c.dim(path)}`));
   }
