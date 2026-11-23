@@ -5,7 +5,7 @@ import { homedir } from "node:os";
 import { SOL_MINT, c, compact, footer, isAddress, main, parseArgs, pct, table } from "../lib/core.js";
 import { quote, tokenPrices } from "../lib/jupiter.js";
 import { resolveSymbol, symbolOf } from "../lib/tokens.js";
-import { applyBuy, applySell, newBook, valuation } from "../lib/book.js";
+import { applyBuy, applySell, checkBook, newBook, valuation } from "../lib/book.js";
 
 const HELP = `memecoin-paper-trading: practise Solana memecoin trades with fake SOL at real prices
 
@@ -30,15 +30,6 @@ const LAMPORTS = 1e9;
 
 function bookPath(args) {
   return resolve(String(args.file || process.env.PAPER_FILE || join(homedir(), ".blix-paper", "portfolio.json")));
-}
-function checkBook(book) {
-  const record = book !== null && typeof book === "object" && !Array.isArray(book);
-  const positions = record && book.positions !== null && typeof book.positions === "object" && !Array.isArray(book.positions);
-  if (!record || !Number.isFinite(book.startSol) || book.startSol <= 0
-    || !Number.isFinite(book.cash) || book.cash < 0 || !positions || !Array.isArray(book.trades)) {
-    throw new Error("invalid portfolio structure");
-  }
-  return book;
 }
 function load(path) {
   if (!existsSync(path)) return newBook();
