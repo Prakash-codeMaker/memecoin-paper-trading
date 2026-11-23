@@ -5,6 +5,7 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { checkBook, newBook } from "../lib/book.js";
 
 const cli = join(dirname(fileURLToPath(import.meta.url)), "..", "bin", "paper.js");
 const run = (args) => spawnSync(process.execPath, [cli, ...args], {
@@ -45,4 +46,21 @@ test("accepts a valid empty portfolio and keeps history usable", () => {
   const result = run(["history", "--file", file]);
   assert.equal(result.status, 0);
   assert.match(result.stdout, /No trades yet/);
+});
+
+
+test("checkBook validates portfolio structure and finite balances", () => {
+  const valid = newBook(10);
+  assert.equal(checkBook(valid), valid);
+
+  for (const invalid of [
+    null,
+    {},
+    { ...newBook(), cash: "9" },
+    { ...newBook(), startSol: Infinity },
+    { ...newBook(), positions: [] },
+    { ...newBook(), trades: {} },
+  ]) {
+    assert.throws(() => checkBook(invalid), /invalid portfolio structure/);
+  }
 });
