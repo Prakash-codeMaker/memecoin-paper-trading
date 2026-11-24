@@ -24,7 +24,7 @@ test("invalid portfolio structures are rejected and reset must be finite", () =>
     writeFileSync(file, content);
     const result = run(["history", "--file", file]);
     assert.equal(result.status, 1);
-    assert.match(result.stderr, /Cannot read .*portfolio\\.json/);
+    assert.match(result.stderr, /Cannot read .*portfolio\.json/);
   }
 
   const reset = run(["reset", "1e999", "--file", file]);
