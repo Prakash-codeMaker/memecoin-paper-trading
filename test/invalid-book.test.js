@@ -24,7 +24,7 @@ test("invalid portfolio structures are rejected and reset must be finite", () =>
     writeFileSync(file, content);
     const result = run(["history", "--file", file]);
     assert.equal(result.status, 1);
-    assert.match(result.stderr, /Cannot read .*portfolio\.json/);
+    assert.match(result.stderr, /Cannot read .*portfolio\\.json/);
   }
 
   const reset = run(["reset", "1e999", "--file", file]);
@@ -56,8 +56,12 @@ test("checkBook validates portfolio structure and finite balances", () => {
   for (const invalid of [
     null,
     {},
-    { ...newBook(), cash: "9" },
+    { ...newBook(), startSol: "10" },
     { ...newBook(), startSol: Infinity },
+    { ...newBook(), cash: "9" },
+    { ...newBook(), cash: -1 },
+    { ...newBook(), cash: Infinity },
+    { ...newBook(), positions: null },
     { ...newBook(), positions: [] },
     { ...newBook(), trades: {} },
   ]) {
