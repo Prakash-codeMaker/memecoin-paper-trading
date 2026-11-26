@@ -70,7 +70,7 @@ memecoin-paper-trading: practise Solana memecoin trades with fake SOL at real pr
 Usage:
   paper buy <mint> <sol>            Buy with paper SOL, filled at a live Jupiter quote
   paper sell <mint> <percent|all>   Sell part or all of a position (e.g. 50, 25%, all)
-  paper portfolio                   Positions valued at what you would get selling now
+  paper portfolio                   Positions valued at what you would get selling now (alias: pf)
   paper history [n]                 Your last n trades (default 20)
   paper reset [sol]                 Start over with a fresh balance (default 10 SOL)
 
@@ -83,6 +83,57 @@ Options:
 Fills use real Jupiter routes and include price impact, so a trade that would
 move a thin pool in real life moves it here too. No wallet, no keys, no real SOL.
 ```
+
+## Environment variables
+
+| Variable | Effect |
+|---|---|
+| `PAPER_FILE` | Portfolio file to use when `--file` is not given (default `~/.blix-paper/portfolio.json`). |
+| `JUP_API_URL` | Jupiter API host for quotes and prices (default `https://lite-api.jup.ag`), e.g. a paid endpoint. |
+| `NO_COLOR` | Set to any value to turn off coloured output. Colour is also off when output is not a terminal. |
+| `BLIX_NO_FOOTER` | Set to any value to hide the one-line BLIX link printed after `paper portfolio`. |
+| `DEBUG` | Set to any value to print the full error and stack trace when a command fails. |
+
+## Portfolio file
+
+The portfolio is plain JSON, so you can back it up, inspect it or chart it. This is what `paper reset` followed by one buy writes (amounts in SOL and whole tokens, times in Unix milliseconds):
+
+```json
+{
+  "version": 1,
+  "startSol": 10,
+  "cash": 9.5,
+  "positions": {
+    "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263": {
+      "mint": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+      "symbol": "Bonk",
+      "tokens": 16587600,
+      "cost": 0.5,
+      "realized": 0,
+      "opened": 1795626651463,
+      "decimals": 5
+    }
+  },
+  "trades": [
+    {
+      "side": "buy",
+      "mint": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+      "symbol": "Bonk",
+      "sol": 0.5,
+      "tokens": 16587600,
+      "price": 3.0142998384335284e-8,
+      "impact": 0,
+      "time": 1795626651463
+    }
+  ],
+  "createdAt": "2026-11-25T17:10:50.383Z"
+}
+```
+
+- `startSol`: the starting balance. `cash`: paper SOL not in a position.
+- `positions`: open positions keyed by mint. `cost` is the SOL still invested (average cost), `realized` is the PnL from partial sells so far.
+- `trades`: every buy and sell, oldest first. Sells also have `pnl`. `impact` is the quote's price impact in percent.
+- `closed`: appears after a position is fully sold, with one `{ mint, symbol, realized, opened, closed }` entry per closed position.
 
 ## How it works
 

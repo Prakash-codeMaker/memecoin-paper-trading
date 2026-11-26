@@ -12,7 +12,7 @@ const HELP = `memecoin-paper-trading: practise Solana memecoin trades with fake 
 Usage:
   paper buy <mint> <sol>            Buy with paper SOL, filled at a live Jupiter quote
   paper sell <mint> <percent|all>   Sell part or all of a position (e.g. 50, 25%, all)
-  paper portfolio                   Positions valued at what you would get selling now
+  paper portfolio                   Positions valued at what you would get selling now (alias: pf)
   paper history [n]                 Your last n trades (default 20)
   paper reset [sol]                 Start over with a fresh balance (default 10 SOL)
 
